@@ -1,0 +1,27 @@
+// Modo oscuro (por defecto)
+:root {
+  --color-text: rgba(255, 255, 255, 0.87);
+  --color-bg: #242424;
+  --color-link: #646cff;
+  --color-link-hover: #535bf2;
+  --button-bg: #1a1a1a;
+  --button-border-hover: #646cff;
+}
+
+// Modo claro por preferencia del sistema
+@media (prefers-color-scheme: light) {
+  :root {
+    --color-text: #213547;
+    --color-bg: #ffffff;
+    --color-link-hover: #747bff;
+    --button-bg: #f9f9f9;
+  }
+}
+
+// Modo claro forzado manualmente
+html.light {
+  --color-text: #213547;
+  --color-bg: #ffffff;
+  --color-link-hover: #747bff;
+  --button-bg: #f9f9f9;
+}
