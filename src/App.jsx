@@ -18,15 +18,16 @@ function App() {
       1000
     );
     camera.position.set(0,5,10);
+    camera.lookAt(0,0,0);
     const renderer = new THREE.WebGLRenderer({canvas: canvasRef.current});
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setClearColor('#111');
 
     // Cube
-    const geometry = new THREE.BoxGeometry();
-    const material = new THREE.MeshStandardMaterial({color: 0x777});
-    const cube = new THREE.Mesh(geometry, material);
+    const cubeGeometry = new THREE.BoxGeometry();
+    const cubeMaterial = new THREE.MeshStandardMaterial({color: 0x777});
+    const cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
     cube.position.set(0,0,-1.5);
     scene.add(cube);
 
@@ -59,6 +60,16 @@ function App() {
 
       scene.add(mesh);
     });
+
+    // Lines
+    const lineMaterial = new THREE.LineBasicMaterial( { color: 0x0000ff });
+    const points = [];
+    points.push( new THREE.Vector3(-4, 2, 0));
+    points.push( new THREE.Vector3(0, 6, 0));
+    points.push( new THREE.Vector3(4, 2, 0));
+    const lineGeometry = new THREE.BufferGeometry().setFromPoints( points );
+    const line = new THREE.Line(lineGeometry, lineMaterial);
+    scene.add(line);
 
     // Animation
     const animation = () => {
