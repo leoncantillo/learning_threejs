@@ -1,34 +1,48 @@
-import { useState } from 'react';
+import { useEffect, useRef} from 'react';
 import Layout from './components/Layout';
-import reactLogo from './assets/react.svg';
-import viteLogo from '/vite.svg';
+import * as THREE from 'three';
 import './styles/App.scss';
 
 function App() {
-  const [count, setCount] = useState(0);
+  const canvasRef = useRef(null);
+
+
+  useEffect(() => {
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(
+      75,
+      window.innerWidth/window.innerHeight,
+      0.1,
+      1000
+    );
+    camera.position.z = 5;
+    const renderer = new THREE.WebGLRenderer({canvas: canvasRef.current});
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setClearColor('#111');
+
+    const geometry = new THREE.BoxGeometry();
+    const material = new THREE.MeshBasicMaterial({color: 0x777});
+    const cube = new THREE.Mesh(geometry, material);
+    cube.rotateX(0.5);
+    scene.add(cube);
+
+    const animation = () => {
+      cube.rotation.y += 0.01;
+      renderer.render(scene, camera);
+    };
+
+    renderer.setAnimationLoop(animation);
+    
+    return () => {
+      renderer.setAnimationLoop(null);
+      renderer.dispose();
+    };
+
+  },[]);
 
   return (
     <Layout>
-      <div>
-        <a href="https://vite.dev" target="_blank" rel="noreferrer">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank" rel="noreferrer">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+      <canvas ref={canvasRef} />
     </Layout>
   );
 }
