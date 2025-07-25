@@ -2,6 +2,7 @@ import { useEffect, useRef} from 'react';
 import Layout from './components/Layout';
 import { FontLoader } from 'three/examples/jsm/loaders/FontLoader';
 import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import * as THREE from 'three';
 import './styles/App.scss';
 
@@ -10,6 +11,11 @@ function App() {
 
 
   useEffect(() => {
+    if (!canvasRef.current) {
+      console.log('Canvas Reference is null.');
+      return;
+    }; 
+
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(
       75,
@@ -23,6 +29,14 @@ function App() {
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setClearColor('#111');
+
+    // Controls (OrbitControls)
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.08;
+    controls.minDistance = 1;
+    controls.maxDistance = 10;
+    controls.update();
 
     // Cube
     const cubeGeometry = new THREE.BoxGeometry();
@@ -73,7 +87,7 @@ function App() {
 
     // Animation
     const animation = () => {
-
+      controls.update();
       cube.rotation.y += 0.01;
       renderer.render(scene, camera);
     };
@@ -101,6 +115,7 @@ function App() {
     
     return () => {
       window.removeEventListener('resize', onWindowResize);
+      controls.dispose();
       renderer.setAnimationLoop(null);
       renderer.dispose();
     };
