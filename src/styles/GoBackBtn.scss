@@ -1,0 +1,25 @@
+.goBackBtn {
+    color: #000;
+    display: flex;
+        align-items: center;
+        gap: 10px;
+    font-size: 35px;
+    line-height: 38px;
+    position: absolute;
+        left: 40px;
+        top: 40px;
+    text-align: center;
+
+    > a {
+        background-color: #fff;
+        border: 3px black solid;
+        border-radius: 40px;
+        color: #000;
+        display: flex;
+            align-items: center;
+            justify-content: center;
+        height: 40px;
+        width: 40px;
+    }
+        
+}
