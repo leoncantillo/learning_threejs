@@ -34,24 +34,40 @@ const Practice_3 = () => {
         const heightSegments = 6;
         const sphereGeometry = new THREE.SphereGeometry(radius, widhtSegments, heightSegments);
 
+        const solarSystem = new THREE.Object3D();
+        scene.add(solarSystem);
+        objects.push(solarSystem);
+
         const sunMaterial = new THREE.MeshPhongMaterial({ emissive: 0xffff00 });
         const sunMesh = new THREE.Mesh(sphereGeometry, sunMaterial);
         sunMesh.position.set(0, 0, 0);
         sunMesh.scale.set(5,5,5);
-        scene.add(sunMesh);
+        solarSystem.add(sunMesh);
         objects.push(sunMesh);
+
+        const earthOrbit = new THREE.Object3D();
+        earthOrbit.position.x = 10;
+        solarSystem.add(earthOrbit);
+        objects.push(earthOrbit);
 
         const earthMaterial = new THREE.MeshPhongMaterial({ color: 0x2233ff, emissive: 0x112244 });
         const earthMesh = new THREE.Mesh(sphereGeometry, earthMaterial);
-        earthMesh.position.set(10, 0, 0);
+        earthOrbit.add(earthMesh);
         objects.push(earthMesh);
 
-        // Make the earth child of the sun
-        sunMesh.add(earthMesh);
+        const moonOrbit = new THREE.Object3D();
+        moonOrbit.position.set(2, 0, 0);
+        earthOrbit.add(moonOrbit);
+
+        const moonMaterial = new THREE.MeshPhongMaterial( {color: 0x888888, emissive: 0x222222} );
+        const moonMesh = new THREE.Mesh(sphereGeometry, moonMaterial);
+        moonMesh.scale.set(.5, .5, .5);
+        moonOrbit.add(moonMesh);
+        objects.push(moonMesh);
 
         function animation() {
             objects.forEach(object => {
-                object.rotation.y += 0.004;
+                object.rotation.y += 0.01;
             });
             renderer.render(scene, camera);
         }
