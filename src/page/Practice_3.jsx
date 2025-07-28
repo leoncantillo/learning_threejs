@@ -9,7 +9,7 @@ const Practice_3 = () => {
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(
             75, window.innerWidth / window.innerHeight,
-            1, 100
+            1, 1000
         );
         camera.position.set(0, 50, 0);
         camera.up.set(0,0,1);
@@ -44,8 +44,10 @@ const Practice_3 = () => {
         const earthMaterial = new THREE.MeshPhongMaterial({ color: 0x2233ff, emissive: 0x112244 });
         const earthMesh = new THREE.Mesh(sphereGeometry, earthMaterial);
         earthMesh.position.set(10, 0, 0);
-        scene.add(earthMesh);
         objects.push(earthMesh);
+
+        // Make the earth child of the sun
+        sunMesh.add(earthMesh);
 
         function animation() {
             objects.forEach(object => {
