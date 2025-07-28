@@ -12,11 +12,11 @@ const Practice_3 = () => {
             1, 100
         );
         camera.position.set(0, 50, 0);
+        camera.up.set(0,0,1);
         camera.lookAt(0,0,0);
 
         const renderer = new THREE.WebGLRenderer({canvas: canvasRef.current});
         renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.setClearColor('#111');
         renderer.render(scene, camera);
 
         const orbitControls = new OrbitControls(camera, renderer.domElement);
@@ -39,7 +39,9 @@ const Practice_3 = () => {
         objects.push(sunMesh);
 
         function animation() {
-            renderer.setAnimationLoop(null);
+            objects.forEach(object => {
+                object.rotation.y += 0.004;
+            });
             renderer.render(scene, camera);
         }
         renderer.setAnimationLoop(animation);
@@ -47,6 +49,7 @@ const Practice_3 = () => {
 
         return () => {
             orbitControls.update();
+            renderer.setAnimationLoop(null);
             renderer.dispose();
         };
     },[]);
