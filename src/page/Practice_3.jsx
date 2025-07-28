@@ -19,6 +19,25 @@ const Practice_3 = () => {
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.render(scene, camera);
 
+        // FOV control variables
+    const tanFOV = Math.tan((Math.PI / 180) * camera.fov / 2);
+    const windowHeight = window.innerHeight;
+
+    // Handle resize
+    const onWindowResize = () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+
+      // Ajustar el FOV según nuevo tamaño de ventana
+      camera.fov = (360 / Math.PI) * Math.atan(tanFOV * (window.innerHeight / windowHeight));
+      camera.updateProjectionMatrix();
+      camera.lookAt(scene.position);
+
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.render(scene, camera);
+    };
+
+    window.addEventListener('resize', onWindowResize);
+
         const orbitControls = new OrbitControls(camera, renderer.domElement);
         orbitControls.update();
 
