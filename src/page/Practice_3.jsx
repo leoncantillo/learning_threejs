@@ -22,6 +22,9 @@ const Practice_3 = () => {
         const orbitControls = new OrbitControls(camera, renderer.domElement);
         orbitControls.update();
 
+        // Lights
+        const sunshine = new THREE.PointLight(0xfffffff, 500);
+        scene.add(sunshine);
 
         const objects = [];
 
