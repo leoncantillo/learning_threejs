@@ -84,6 +84,13 @@ const Practice_3 = () => {
         moonOrbit.add(moonMesh);
         objects.push(moonMesh);
 
+        objects.forEach((node) => {
+            const axes = new THREE.AxesHelper();
+                axes.material.depthTest = false;
+                axes.renderOrder = 1;
+                node.add(axes);
+        });
+
         function animation() {
             objects.forEach(object => {
                 object.rotation.y += 0.01;
