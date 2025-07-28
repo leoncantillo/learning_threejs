@@ -1,11 +1,14 @@
 import { useEffect, useRef } from 'react';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import * as THREE from 'three';
+import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
+import AxisGridHelper from '../utils/AxisGridHelper';
 
 const Practice_3 = () => {
     const canvasRef = useRef(null);
 
     useEffect(() => {
+        const gui = new GUI();
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(
             75, window.innerWidth / window.innerHeight,
@@ -84,12 +87,17 @@ const Practice_3 = () => {
         moonOrbit.add(moonMesh);
         objects.push(moonMesh);
 
-        objects.forEach((node) => {
-            const axes = new THREE.AxesHelper();
-                axes.material.depthTest = false;
-                axes.renderOrder = 1;
-                node.add(axes);
-        });
+        function makeAxisGrid(node, label, units) {
+            const helper = new AxisGridHelper(node, units);
+            gui.add(helper, 'visible').name(label);
+        }
+
+        makeAxisGrid(solarSystem, 'solarSystem', 25);
+        makeAxisGrid(sunMesh, 'sunMesh');
+        makeAxisGrid(earthOrbit, 'earthOrbit');
+        makeAxisGrid(earthMesh, 'earthMesh');
+        makeAxisGrid(moonOrbit, 'moonOrbit');
+        makeAxisGrid(moonMesh, 'moonMesh');
 
         function animation() {
             objects.forEach(object => {
@@ -104,6 +112,8 @@ const Practice_3 = () => {
             orbitControls.update();
             renderer.setAnimationLoop(null);
             renderer.dispose();
+            gui.destroy();
+
         };
     },[]);
 
