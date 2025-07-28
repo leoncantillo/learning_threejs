@@ -11,11 +11,6 @@ function Practice_2() {
     let mixers = [];
 
   useEffect(() => {
-    if (!canvasRef.current) {
-      console.log('Canvas Reference is null.');
-      return;
-    };
-
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(
       75,
