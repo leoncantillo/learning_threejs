@@ -38,6 +38,12 @@ const Practice_3 = () => {
         scene.add(sunMesh);
         objects.push(sunMesh);
 
+        const earthMaterial = new THREE.MeshPhongMaterial({ color: 0x2233ff, emissive: 0x112244 });
+        const earthMesh = new THREE.Mesh(sphereGeometry, earthMaterial);
+        earthMesh.position.set(10, 0, 0);
+        scene.add(earthMesh);
+        objects.push(earthMesh);
+
         function animation() {
             objects.forEach(object => {
                 object.rotation.y += 0.004;
