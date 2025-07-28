@@ -8,6 +8,7 @@ export default function Navbar() {
       <ul>
         <li><Link to="/practice_1">Hello Cube</Link></li>
         <li><Link to="/practice_2">Meme Replica</Link></li>
+        <li><Link to="/practice_3">Solar System</Link></li>
       </ul>
     </div>
   );
