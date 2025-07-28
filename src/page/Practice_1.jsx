@@ -10,12 +10,7 @@ const Practice_1 = () => {
       const clock = new THREE.Clock();
       let mixers = [];
   
-    useEffect(() => {
-      if (!canvasRef.current) {
-        console.log('Canvas Reference is null.');
-        return;
-      };
-  
+    useEffect(() => {  
       const scene = new THREE.Scene();
       const camera = new THREE.PerspectiveCamera(
         75,
