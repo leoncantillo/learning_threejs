@@ -1,7 +1,9 @@
 import { useEffect, useRef} from 'react';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { FBXLoader } from 'three/addons/loaders/FBXLoader.js';
 import * as THREE from 'three';
+import createMultilineTextTexture from '../utils/createMultilineTextTexture';
 
 function Practice_2() {
   const canvasRef = useRef(null);
@@ -21,10 +23,18 @@ function Practice_2() {
     camera.position.set(-0.4,1,2.5);
     camera.lookAt(0,0,0);
     
-    const renderer = new THREE.WebGLRenderer({canvas: canvasRef.current});
+    const renderer = new THREE.WebGLRenderer({canvas: canvasRef.current, antialias: true});
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setClearColor('#d4d4d4');
+    renderer.shadowMap.enabled = true;
+
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.08;
+    controls.minDistance = 1;
+    controls.maxDistance = 10;
+    controls.maxPolarAngle = Math.PI / 2.02;
+    controls.update();
 
     // FOV control variables
     const tanFOV = Math.tan((Math.PI / 180) * camera.fov / 2);
@@ -45,19 +55,45 @@ function Practice_2() {
 
     window.addEventListener('resize', onWindowResize);
 
-    // Lights
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
-    scene.add(ambientLight);
+    {
+      const light = new THREE.PointLight(0xffffff, 160);
+      light.position.set(0, 4, 3);
+      light.castShadow = true;
+      scene.add(light);
 
-    const light = new THREE.DirectionalLight(0xffffff, 1);
-    light.position.set(10, 10, 0);
-    scene.add(light);
+      const helper = new THREE.PointLightHelper(light);
+      scene.add(helper);
+    }
 
-    const planeGeometry = new THREE.PlaneGeometry(6,6);
-    const planeMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide});
-    const meshPlane = new THREE.Mesh(planeGeometry, planeMaterial);
-    meshPlane.rotation.x = Math.PI/2;
-    scene.add(meshPlane);
+    {
+      // CUBE WALLS
+      const cubeSize = 6;
+      const geometry = new THREE.BoxGeometry(cubeSize, cubeSize, cubeSize*1.5);
+      const material = new THREE.MeshPhongMaterial({color: '#ccc', side: THREE.BackSide});
+      const mesh = new THREE.Mesh(geometry, material);
+      mesh.receiveShadow = true;
+      mesh.position.set(0, cubeSize/2, cubeSize/4);
+      scene.add(mesh);
+    }
+
+    {
+      const textTexture = createMultilineTextTexture(
+        `This 3D models were basen on:
+        1. "Metaretail: Escalator"
+          (https://sketchfab.com/3d-models/metaretail-escalator-d1706d72bf7943ab9bd7f48f18cb591e)
+          by vmmaniac (https://sketchfab.com/vmmaniac)
+          licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+        2. "Characteres" (https://mixamo.com)`,
+        1920, 620, 40,'#ffffff02', '#000'
+      );
+
+      const geometry = new THREE.PlaneGeometry(5, 2);
+      const material = new THREE.MeshPhongMaterial({map: textTexture, transparent: true});
+      const wallText = new THREE.Mesh(geometry, material);
+      wallText.position.set(0, 3, -2.998);
+      wallText.receiveShadow = true;
+      scene.add(wallText);
+    }
 
     // 3D ESCALATOR MODEL
     gltfLoader.load('/models/escalator.glb',(glb) => {
@@ -162,7 +198,7 @@ function Practice_2() {
       const delta = clock.getDelta();
       mixers.forEach(mixer => mixer.update(delta));
 
-      // controls.update();
+      controls.update();
 
       renderer.render(scene, camera);
     };
