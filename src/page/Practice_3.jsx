@@ -117,6 +117,7 @@ const Practice_3 = () => {
 
 
         return () => {
+            window.removeEventListener('resize', onWindowResize);
             orbitControls.update();
             renderer.setAnimationLoop(null);
             renderer.dispose();
