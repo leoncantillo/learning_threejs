@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import * as THREE from 'three';
 import planetaryData from '../utils/planetaryDatax100.js';
@@ -6,6 +6,12 @@ import FocusPlanetBtn from '../components/FocusPlanetBtn.jsx';
 
 const Practice_3 = () => {
     const canvasRef = useRef(null);
+    const planetRefs = useRef({});
+    const cameraRef = useRef(null);
+    const orbitControlsRef = useRef(null);
+    const [isReady, setIsReady] = useState(false);
+    const cameraTransition = useRef(null);
+
 
     useEffect(() => {
         const scene = new THREE.Scene();
@@ -13,9 +19,10 @@ const Practice_3 = () => {
             75, window.innerWidth / window.innerHeight,
             0.000001, 10000
         );
-        camera.position.set(0, 2, 10);
+        camera.position.set(0, 5, 15);
         camera.up.set(0, 1, 0);
         camera.lookAt(0, 0, 0);
+        cameraRef.current = camera;
 
         const renderer = new THREE.WebGLRenderer({ canvas: canvasRef.current });
         renderer.setSize(window.innerWidth, window.innerHeight);
@@ -24,6 +31,7 @@ const Practice_3 = () => {
         const orbitControls = new OrbitControls(camera, renderer.domElement);
         orbitControls.zoomSpeed = 5;
         orbitControls.update();
+        orbitControlsRef.current = orbitControls;
 
         // FOV control variables
         const tanFOV = Math.tan((Math.PI / 180) * camera.fov / 2);
@@ -67,6 +75,7 @@ const Practice_3 = () => {
 
         const sunMesh = createSphereCB(planetaryData.sun);
         solarSystem.add(sunMesh);
+        planetRefs.current.sun = sunMesh;
         objects.push(sunMesh);
 
         const earthOrbit = new THREE.Object3D();
@@ -75,6 +84,7 @@ const Practice_3 = () => {
 
         const earthMesh = createSphereCB(planetaryData.earth);
         earthOrbit.add(earthMesh);
+        planetRefs.current.earth = earthMesh;
         objects.push(earthMesh);
 
         // const moonOrbit = new THREE.Object3D();
@@ -93,10 +103,25 @@ const Practice_3 = () => {
 
         const jupiterMesh = createSphereCB(planetaryData.jupiter);
         jupiterOrbit.add(jupiterMesh);
+        planetRefs.current.jupiter = jupiterMesh;
         objects.push(jupiterMesh);
 
 
-        function animation() {
+        function animation(time) {
+            if (cameraTransition.current) {
+                const { startTime, duration, start, targetPos, targetLook } = cameraTransition.current;
+                const elapsed = (time - startTime) / duration;
+                const t = Math.min(elapsed, 1);
+
+                cameraRef.current.position.lerpVectors(start.pos, targetPos, t);
+                orbitControlsRef.current.target.lerpVectors(start.target, targetLook, t);
+                orbitControlsRef.current.update();
+
+                if (t >= 1) {
+                    cameraTransition.current = null;
+                }
+            }
+
             // objects.forEach(object => {
             //     object.rotation.y += 0.01;
             // });
@@ -104,7 +129,8 @@ const Practice_3 = () => {
         }
         renderer.setAnimationLoop(animation);
 
-
+        setIsReady(true);
+        
         return () => {
             window.removeEventListener('resize', onWindowResize);
             orbitControls.update();
@@ -113,10 +139,38 @@ const Practice_3 = () => {
         };
     }, []);
 
+    // Función para enfocar la cámara en un planeta
+    const focusOnPlanet = (planetName) => {
+        const mesh = planetRefs.current[planetName];
+        if (!mesh) { console.error('No mesh:', planetName); return; }
+
+        const pos = new THREE.Vector3();
+        mesh.getWorldPosition(pos);
+
+        const radius = planetaryData[planetName]?.radius || 1;
+        const offset = new THREE.Vector3(0, 0, radius * 4);
+        const targetPos = pos.clone().add(offset);
+
+        const cam = cameraRef.current;
+        cam.rotation.y = Math.PI / 4;
+        const ctrl = orbitControlsRef.current;
+
+        cameraTransition.current = {
+            startTime: performance.now(),
+            duration: 1000,
+            start: {
+                pos: cam.position.clone(),
+                target: ctrl.target.clone()
+            },
+            targetPos,
+            targetLook: pos
+        };
+    };
+
     return (
         <>
             <canvas ref={canvasRef} />
-            <FocusPlanetBtn focusOnPlanet={()=>{}} />
+            {isReady && <FocusPlanetBtn focusOnPlanet={focusOnPlanet} />}
         </>
     );
 };
