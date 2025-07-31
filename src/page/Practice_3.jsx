@@ -67,7 +67,6 @@ const Practice_3 = () => {
             planetaryData.sun.emissiveColor
         );
         sunMesh.position.set(0, 0, 0);
-        sunMesh.scale.set(5, 5, 5);
         solarSystem.add(sunMesh);
         objects.push(sunMesh);
 
