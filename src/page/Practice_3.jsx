@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import * as THREE from 'three';
-import { scaledPlanetData, emissivePlanetColors } from '../utils/planetaryData.js';
+import planetaryData from '../utils/planetaryData.js';
 
 const Practice_3 = () => {
     const canvasRef = useRef(null);
@@ -20,6 +20,9 @@ const Practice_3 = () => {
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.render(scene, camera);
 
+        const orbitControls = new OrbitControls(camera, renderer.domElement);
+        orbitControls.zoomSpeed = 5;
+        orbitControls.update();
         // FOV control variables
         const tanFOV = Math.tan((Math.PI / 180) * camera.fov / 2);
         const windowHeight = window.innerHeight;
@@ -39,10 +42,6 @@ const Practice_3 = () => {
 
         window.addEventListener('resize', onWindowResize);
 
-        const orbitControls = new OrbitControls(camera, renderer.domElement);
-        orbitControls.zoomSpeed = 5;
-        orbitControls.update();
-
         // Lights
         const sunshine = new THREE.PointLight(0xfffffff, 500);
         scene.add(sunshine);
@@ -50,19 +49,23 @@ const Practice_3 = () => {
         const objects = [];
 
         // Sphere Geometry
-        function createSpherePlanet(radius) {
+        function createSpherePlanet(radius, color, emissiveColor) {
             const widhtSegments = 6;
             const heightSegments = 6;
-            return new THREE.SphereGeometry(radius, widhtSegments, heightSegments);
+            const geometry = new THREE.SphereGeometry(radius, widhtSegments, heightSegments);
+            const material = new THREE.MeshPhongMaterial({color: color, emissive: emissiveColor });
+            return new THREE.Mesh(geometry, material);
         }
 
         const solarSystem = new THREE.Object3D();
         scene.add(solarSystem);
         objects.push(solarSystem);
 
-        const sunGeo = createSpherePlanet(scaledPlanetData.sun.radius);
-        const sunMaterial = new THREE.MeshPhongMaterial({ emissive: 0xffff00 });
-        const sunMesh = new THREE.Mesh(sunGeo, sunMaterial);
+        const sunMesh = createSpherePlanet(
+            planetaryData.sun.radius,
+            planetaryData.sun.color,
+            planetaryData.sun.emissiveColor
+        );
         sunMesh.position.set(0, 0, 0);
         sunMesh.scale.set(5, 5, 5);
         solarSystem.add(sunMesh);
@@ -73,9 +76,11 @@ const Practice_3 = () => {
         solarSystem.add(earthOrbit);
         objects.push(earthOrbit);
 
-        const earthGeo = createSpherePlanet(scaledPlanetData.earth.radius);
-        const earthMaterial = new THREE.MeshPhongMaterial({ color: 0x2233ff, emissive: 0x112244 });
-        const earthMesh = new THREE.Mesh(earthGeo, earthMaterial);
+        const earthMesh = createSpherePlanet(
+            planetaryData.earth.radius,
+            planetaryData.earth.color,
+            planetaryData.earth.emissiveColor
+        );
         earthOrbit.add(earthMesh);
         objects.push(earthMesh);
 
@@ -94,12 +99,11 @@ const Practice_3 = () => {
         solarSystem.add(jupiterOrbit);
         objects.push(jupiterOrbit);
 
-        const jupiterGeo = createSpherePlanet(scaledPlanetData.jupiter.radius);
-        const jupiterMaterial = new THREE.MeshPhongMaterial({ 
-            color: 0x2233ff, 
-            emissive: emissivePlanetColors.jupiter
-        });
-        const jupiterMesh = new THREE.Mesh(jupiterGeo, jupiterMaterial);
+        const jupiterMesh = createSpherePlanet(
+            planetaryData.jupiter.radius,
+            planetaryData.jupiter.color,
+            planetaryData.jupiter.emissiveColor
+        );
         jupiterOrbit.add(jupiterMesh);
         objects.push(jupiterMesh);
 
