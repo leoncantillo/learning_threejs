@@ -2,8 +2,8 @@
 import { useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { FontLoader } from 'three/examples/jsm/loaders/FontLoader';
-import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry';
+import { FontLoader } from 'three/addons/loaders/FontLoader.js';
+import { TextGeometry } from 'three/addons/geometries/TextGeometry.js';
 
 const Practice_1 = () => {
   const canvasRef = useRef(null);
@@ -20,7 +20,7 @@ const Practice_1 = () => {
       );
       camera.position.set(0,2,5);
       camera.lookAt(0,0,0);
-      const renderer = new THREE.WebGLRenderer({canvas: canvasRef.current});
+      const renderer = new THREE.WebGLRenderer({canvas: canvasRef.current, antialias: true});
       renderer.setPixelRatio(window.devicePixelRatio);
       renderer.setSize(window.innerWidth, window.innerHeight);
       renderer.setClearColor('#d4d4d4');
@@ -49,7 +49,7 @@ const Practice_1 = () => {
       controls.enableDamping = true;
       controls.dampingFactor = 0.08;
       controls.minDistance = 1;
-      controls.maxDistance = 6;
+      controls.maxDistance = 1000;
       controls.maxPolarAngle = Math.PI/2.05;
       controls.update();
 
@@ -68,14 +68,19 @@ const Practice_1 = () => {
       cube.position.set(0,0,-1.5);
       scene.add(cube);
       
-  
       // Text
       const loader = new FontLoader();
-      loader.load('/fonts/OpenSans_Bold.json', function (font) {
+      loader.load('/fonts/helvetiker_bold.typeface.json', function (font) {
         const textGeometry = new TextGeometry('Hello Cube', {
           font: font,
           size: 1,
-          height: 0.02,
+          depth: 0.4,
+          curveSegments: 12,
+          bevelEnabled: true,
+          bevelThickness: 0.1,
+          bevelSize: 0.04,
+          bevelOffset: 0,
+          bevelSegments: 1
         });
         textGeometry.center();
   
@@ -86,10 +91,9 @@ const Practice_1 = () => {
         });
         const mesh = new THREE.Mesh(textGeometry, material);
         mesh.castShadow = true;
-        mesh.scale.set(1, 1, 0.008);
   
         scene.add(mesh);
-      });
+      }, ()=>{},() => console.log('Error With the text loader.'));
   
       const planeGeometry = new THREE.PlaneGeometry(10,10);
       const planeMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide});
