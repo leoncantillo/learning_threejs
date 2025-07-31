@@ -1,47 +1,46 @@
 import { useEffect, useRef } from 'react';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import * as THREE from 'three';
-import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
-import AxisGridHelper from '../utils/AxisGridHelper';
+import { scaledPlanetData, emissivePlanetColors } from '../utils/planetaryData.js';
 
 const Practice_3 = () => {
     const canvasRef = useRef(null);
 
     useEffect(() => {
-        const gui = new GUI();
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(
             75, window.innerWidth / window.innerHeight,
-            1, 1000
+            1, 10000
         );
-        camera.position.set(0, 50, 0);
-        camera.up.set(0,0,1);
-        camera.lookAt(0,0,0);
+        camera.position.set(0, 2, 10);
+        camera.up.set(0, 1, 0);
+        camera.lookAt(0, 0, 0);
 
-        const renderer = new THREE.WebGLRenderer({canvas: canvasRef.current});
+        const renderer = new THREE.WebGLRenderer({ canvas: canvasRef.current });
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.render(scene, camera);
 
         // FOV control variables
-    const tanFOV = Math.tan((Math.PI / 180) * camera.fov / 2);
-    const windowHeight = window.innerHeight;
+        const tanFOV = Math.tan((Math.PI / 180) * camera.fov / 2);
+        const windowHeight = window.innerHeight;
 
-    // Handle resize
-    const onWindowResize = () => {
-      camera.aspect = window.innerWidth / window.innerHeight;
+        // Handle resize
+        const onWindowResize = () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
 
-      // Ajustar el FOV según nuevo tamaño de ventana
-      camera.fov = (360 / Math.PI) * Math.atan(tanFOV * (window.innerHeight / windowHeight));
-      camera.updateProjectionMatrix();
-      camera.lookAt(scene.position);
+            // Ajustar el FOV según nuevo tamaño de ventana
+            camera.fov = (360 / Math.PI) * Math.atan(tanFOV * (window.innerHeight / windowHeight));
+            camera.updateProjectionMatrix();
+            camera.lookAt(scene.position);
 
-      renderer.setSize(window.innerWidth, window.innerHeight);
-      renderer.render(scene, camera);
-    };
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.render(scene, camera);
+        };
 
-    window.addEventListener('resize', onWindowResize);
+        window.addEventListener('resize', onWindowResize);
 
         const orbitControls = new OrbitControls(camera, renderer.domElement);
+        orbitControls.zoomSpeed = 5;
         orbitControls.update();
 
         // Lights
@@ -51,19 +50,21 @@ const Practice_3 = () => {
         const objects = [];
 
         // Sphere Geometry
-        const radius = 1;  
-        const widhtSegments = 6;
-        const heightSegments = 6;
-        const sphereGeometry = new THREE.SphereGeometry(radius, widhtSegments, heightSegments);
+        function createSpherePlanet(radius) {
+            const widhtSegments = 6;
+            const heightSegments = 6;
+            return new THREE.SphereGeometry(radius, widhtSegments, heightSegments);
+        }
 
         const solarSystem = new THREE.Object3D();
         scene.add(solarSystem);
         objects.push(solarSystem);
 
+        const sunGeo = createSpherePlanet(scaledPlanetData.sun.radius);
         const sunMaterial = new THREE.MeshPhongMaterial({ emissive: 0xffff00 });
-        const sunMesh = new THREE.Mesh(sphereGeometry, sunMaterial);
+        const sunMesh = new THREE.Mesh(sunGeo, sunMaterial);
         sunMesh.position.set(0, 0, 0);
-        sunMesh.scale.set(5,5,5);
+        sunMesh.scale.set(5, 5, 5);
         solarSystem.add(sunMesh);
         objects.push(sunMesh);
 
@@ -72,37 +73,41 @@ const Practice_3 = () => {
         solarSystem.add(earthOrbit);
         objects.push(earthOrbit);
 
+        const earthGeo = createSpherePlanet(scaledPlanetData.earth.radius);
         const earthMaterial = new THREE.MeshPhongMaterial({ color: 0x2233ff, emissive: 0x112244 });
-        const earthMesh = new THREE.Mesh(sphereGeometry, earthMaterial);
+        const earthMesh = new THREE.Mesh(earthGeo, earthMaterial);
         earthOrbit.add(earthMesh);
         objects.push(earthMesh);
 
-        const moonOrbit = new THREE.Object3D();
-        moonOrbit.position.set(2, 0, 0);
-        earthOrbit.add(moonOrbit);
+        // const moonOrbit = new THREE.Object3D();
+        // moonOrbit.position.set(2, 0, 0);
+        // earthOrbit.add(moonOrbit);
 
-        const moonMaterial = new THREE.MeshPhongMaterial( {color: 0x888888, emissive: 0x222222} );
-        const moonMesh = new THREE.Mesh(sphereGeometry, moonMaterial);
-        moonMesh.scale.set(.5, .5, .5);
-        moonOrbit.add(moonMesh);
-        objects.push(moonMesh);
+        // const moonMaterial = new THREE.MeshPhongMaterial({ color: 0x888888, emissive: 0x222222 });
+        // const moonMesh = new THREE.Mesh(sphereGeometry, moonMaterial);
+        // moonMesh.scale.set(.5, .5, .5);
+        // moonOrbit.add(moonMesh);
+        // objects.push(moonMesh);
 
-        function makeAxisGrid(node, label, units) {
-            const helper = new AxisGridHelper(node, units);
-            gui.add(helper, 'visible').name(label);
-        }
+        const jupiterOrbit = new THREE.Object3D();
+        jupiterOrbit.position.x = 10;
+        solarSystem.add(jupiterOrbit);
+        objects.push(jupiterOrbit);
 
-        makeAxisGrid(solarSystem, 'solarSystem', 25);
-        makeAxisGrid(sunMesh, 'sunMesh');
-        makeAxisGrid(earthOrbit, 'earthOrbit');
-        makeAxisGrid(earthMesh, 'earthMesh');
-        makeAxisGrid(moonOrbit, 'moonOrbit');
-        makeAxisGrid(moonMesh, 'moonMesh');
+        const jupiterGeo = createSpherePlanet(scaledPlanetData.jupiter.radius);
+        const jupiterMaterial = new THREE.MeshPhongMaterial({ 
+            color: 0x2233ff, 
+            emissive: emissivePlanetColors.jupiter
+        });
+        const jupiterMesh = new THREE.Mesh(jupiterGeo, jupiterMaterial);
+        jupiterOrbit.add(jupiterMesh);
+        objects.push(jupiterMesh);
+
 
         function animation() {
-            objects.forEach(object => {
-                object.rotation.y += 0.01;
-            });
+            // objects.forEach(object => {
+            //     object.rotation.y += 0.01;
+            // });
             renderer.render(scene, camera);
         }
         renderer.setAnimationLoop(animation);
@@ -112,14 +117,12 @@ const Practice_3 = () => {
             orbitControls.update();
             renderer.setAnimationLoop(null);
             renderer.dispose();
-            gui.destroy();
-
         };
-    },[]);
+    }, []);
 
-  return (
-    <canvas ref={canvasRef} />
-  );
+    return (
+        <canvas ref={canvasRef} />
+    );
 };
 
 export default Practice_3;
