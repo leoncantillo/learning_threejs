@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import * as THREE from 'three';
-import planetaryData from '../utils/planetaryData.js';
+import planetaryData from '../utils/planetaryDatax100.js';
 
 const Practice_3 = () => {
     const canvasRef = useRef(null);
@@ -23,6 +23,7 @@ const Practice_3 = () => {
         const orbitControls = new OrbitControls(camera, renderer.domElement);
         orbitControls.zoomSpeed = 5;
         orbitControls.update();
+
         // FOV control variables
         const tanFOV = Math.tan((Math.PI / 180) * camera.fov / 2);
         const windowHeight = window.innerHeight;
@@ -48,38 +49,30 @@ const Practice_3 = () => {
 
         const objects = [];
 
-        // Sphere Geometry
-        function createSpherePlanet(radius, color, emissiveColor) {
+        // Sphere Celestial Body Geometry
+        function createSphereCB(celestialBody) {
             const widhtSegments = 6;
             const heightSegments = 6;
-            const geometry = new THREE.SphereGeometry(radius, widhtSegments, heightSegments);
-            const material = new THREE.MeshPhongMaterial({color: color, emissive: emissiveColor });
-            return new THREE.Mesh(geometry, material);
+            const geometry = new THREE.SphereGeometry(celestialBody.radius, widhtSegments, heightSegments);
+            const material = new THREE.MeshPhongMaterial({ color: celestialBody.color, emissive: celestialBody.emissiveColor });
+            const mesh = new THREE.Mesh(geometry, material);
+            mesh.position.x = celestialBody.distance;
+            return mesh;
         }
 
         const solarSystem = new THREE.Object3D();
         scene.add(solarSystem);
         objects.push(solarSystem);
 
-        const sunMesh = createSpherePlanet(
-            planetaryData.sun.radius,
-            planetaryData.sun.color,
-            planetaryData.sun.emissiveColor
-        );
-        sunMesh.position.set(0, 0, 0);
+        const sunMesh = createSphereCB(planetaryData.sun);
         solarSystem.add(sunMesh);
         objects.push(sunMesh);
 
         const earthOrbit = new THREE.Object3D();
-        earthOrbit.position.x = 10;
         solarSystem.add(earthOrbit);
         objects.push(earthOrbit);
 
-        const earthMesh = createSpherePlanet(
-            planetaryData.earth.radius,
-            planetaryData.earth.color,
-            planetaryData.earth.emissiveColor
-        );
+        const earthMesh = createSphereCB(planetaryData.earth);
         earthOrbit.add(earthMesh);
         objects.push(earthMesh);
 
@@ -94,15 +87,10 @@ const Practice_3 = () => {
         // objects.push(moonMesh);
 
         const jupiterOrbit = new THREE.Object3D();
-        jupiterOrbit.position.x = 10;
         solarSystem.add(jupiterOrbit);
         objects.push(jupiterOrbit);
 
-        const jupiterMesh = createSpherePlanet(
-            planetaryData.jupiter.radius,
-            planetaryData.jupiter.color,
-            planetaryData.jupiter.emissiveColor
-        );
+        const jupiterMesh = createSphereCB(planetaryData.jupiter);
         jupiterOrbit.add(jupiterMesh);
         objects.push(jupiterMesh);
 
