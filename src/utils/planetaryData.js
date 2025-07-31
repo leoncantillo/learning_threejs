@@ -1,4 +1,4 @@
-const scaledPlanetData = {
+export const scaledPlanetData = {
   sun: {
     radius: 0.69634,       // en unidades (696,340 km)
     distance: 0,           // el Sol está en el origen
@@ -46,4 +46,14 @@ const scaledPlanetData = {
   }
 };
 
-export default scaledPlanetData;
+export const emissivePlanetColors = {
+  mercury: "#2a2a2a",
+  venus: "#552222",
+  earth: "#444444",
+  mars: "#3b1f1f",
+  jupiter: "#663311",
+  saturn: "#554422",
+  uranus: "#334455",
+  neptune: "#223355",
+  pluto: "#1a1a1a",
+};
