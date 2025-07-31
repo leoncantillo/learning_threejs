@@ -53,7 +53,7 @@ const Practice_3 = () => {
         window.addEventListener('resize', onWindowResize);
 
         // Lights
-        const sunshine = new THREE.PointLight(0xfffffff, 500);
+        const sunshine = new THREE.PointLight(0xfffffff, 5000);
         scene.add(sunshine);
 
         const objects = [];
@@ -78,6 +78,24 @@ const Practice_3 = () => {
         planetRefs.current.sun = sunMesh;
         objects.push(sunMesh);
 
+        const mercuryOrbit = new THREE.Object3D();
+        solarSystem.add(mercuryOrbit);
+        objects.push(mercuryOrbit);
+
+        const mercuryMesh = createSphereCB(planetaryData.mercury);
+        mercuryOrbit.add(mercuryMesh);
+        planetRefs.current.mercury = mercuryMesh;
+        objects.push(mercuryMesh);
+
+        const venusOrbit = new THREE.Object3D();
+        solarSystem.add(venusOrbit);
+        objects.push(venusOrbit);
+
+        const venusMesh = createSphereCB(planetaryData.venus);
+        venusOrbit.add(venusMesh);
+        planetRefs.current.venus = venusMesh;
+        objects.push(venusMesh);
+
         const earthOrbit = new THREE.Object3D();
         solarSystem.add(earthOrbit);
         objects.push(earthOrbit);
@@ -97,6 +115,15 @@ const Practice_3 = () => {
         // moonOrbit.add(moonMesh);
         // objects.push(moonMesh);
 
+        const marsOrbit = new THREE.Object3D();
+        solarSystem.add(marsOrbit);
+        objects.push(marsOrbit);
+
+        const marsMesh = createSphereCB(planetaryData.mars);
+        marsOrbit.add(marsMesh);
+        planetRefs.current.mars = marsMesh;
+        objects.push(marsMesh);
+
         const jupiterOrbit = new THREE.Object3D();
         solarSystem.add(jupiterOrbit);
         objects.push(jupiterOrbit);
@@ -105,6 +132,42 @@ const Practice_3 = () => {
         jupiterOrbit.add(jupiterMesh);
         planetRefs.current.jupiter = jupiterMesh;
         objects.push(jupiterMesh);
+
+        const saturnOrbit = new THREE.Object3D();
+        solarSystem.add(saturnOrbit);
+        objects.push(saturnOrbit);
+
+        const saturnMesh = createSphereCB(planetaryData.saturn);
+        saturnOrbit.add(saturnMesh);
+        planetRefs.current.saturn = saturnMesh;
+        objects.push(saturnMesh);
+
+        const uranusOrbit = new THREE.Object3D();
+        solarSystem.add(uranusOrbit);
+        objects.push(uranusOrbit);
+
+        const uranusMesh = createSphereCB(planetaryData.uranus);
+        uranusOrbit.add(uranusMesh);
+        planetRefs.current.uranus = uranusMesh;
+        objects.push(uranusMesh);
+
+        const neptuneOrbit = new THREE.Object3D();
+        solarSystem.add(neptuneOrbit);
+        objects.push(neptuneOrbit);
+
+        const neptuneMesh = createSphereCB(planetaryData.neptune);
+        neptuneOrbit.add(neptuneMesh);
+        planetRefs.current.neptune = neptuneMesh;
+        objects.push(neptuneMesh);
+
+        const plutoOrbit = new THREE.Object3D();
+        solarSystem.add(plutoOrbit);
+        objects.push(plutoOrbit);
+
+        const plutoMesh = createSphereCB(planetaryData.pluto);
+        plutoOrbit.add(plutoMesh);
+        planetRefs.current.pluto = plutoMesh;
+        objects.push(plutoMesh);
 
 
         function animation(time) {
