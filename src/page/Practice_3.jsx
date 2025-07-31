@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import * as THREE from 'three';
 import planetaryData from '../utils/planetaryDatax100.js';
+import FocusPlanetBtn from '../components/FocusPlanetBtn.jsx';
 
 const Practice_3 = () => {
     const canvasRef = useRef(null);
@@ -10,7 +11,7 @@ const Practice_3 = () => {
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(
             75, window.innerWidth / window.innerHeight,
-            1, 10000
+            0.000001, 10000
         );
         camera.position.set(0, 2, 10);
         camera.up.set(0, 1, 0);
@@ -113,7 +114,10 @@ const Practice_3 = () => {
     }, []);
 
     return (
-        <canvas ref={canvasRef} />
+        <>
+            <canvas ref={canvasRef} />
+            <FocusPlanetBtn focusOnPlanet={()=>{}} />
+        </>
     );
 };
 
