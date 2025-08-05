@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import * as THREE from 'three';
-import planetaryData from '../utils/planetaryDatax100.js';
+import planetaryData from '../utils/planetaryDataBig.js';
 import FocusPlanetBtn from '../components/FocusPlanetBtn.jsx';
 
 const Practice_3 = () => {
@@ -19,7 +19,7 @@ const Practice_3 = () => {
             75, window.innerWidth / window.innerHeight,
             0.000001, 10000
         );
-        camera.position.set(0, 5, 15);
+        camera.position.set(0, 5, 85);
         camera.up.set(0, 1, 0);
         camera.lookAt(0, 0, 0);
         cameraRef.current = camera;
@@ -66,6 +66,7 @@ const Practice_3 = () => {
             const material = new THREE.MeshPhongMaterial({ color: celestialBody.color, emissive: celestialBody.emissiveColor });
             const mesh = new THREE.Mesh(geometry, material);
             mesh.position.x = celestialBody.distance;
+            mesh.renderOrder = 999;
             return mesh;
         }
 
@@ -170,6 +171,13 @@ const Practice_3 = () => {
         objects.push(plutoMesh);
 
 
+        Object.entries(planetaryData).forEach(([name, planet]) => {
+            if (name !== 'sun') {
+                const orbit = createOrbit(planet.distance);
+                scene.add(orbit);
+            }
+        });
+
         function animation(time) {
             if (cameraTransition.current) {
                 const { startTime, duration, start, targetPos, targetLook } = cameraTransition.current;
@@ -193,7 +201,7 @@ const Practice_3 = () => {
         renderer.setAnimationLoop(animation);
 
         setIsReady(true);
-        
+
         return () => {
             window.removeEventListener('resize', onWindowResize);
             orbitControls.update();
@@ -229,6 +237,25 @@ const Practice_3 = () => {
             targetLook: pos
         };
     };
+
+    function createOrbit(radius, segments = 100, color = 0xffffff) {
+        const curve = new THREE.EllipseCurve(
+            0, 0,
+            radius, radius,
+            0, 2 * Math.PI,
+            false, 0
+        );
+
+        const points = curve.getPoints(segments);
+        const geometry = new THREE.BufferGeometry().setFromPoints(points);
+
+        const material = new THREE.LineBasicMaterial({ color });
+        const orbit = new THREE.LineLoop(geometry, material);
+
+        orbit.rotation.x = Math.PI / 2;
+
+        return orbit;
+    }
 
     return (
         <>
