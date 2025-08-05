@@ -11,7 +11,7 @@ const Practice_3 = () => {
     const orbitControlsRef = useRef(null);
     const [isReady, setIsReady] = useState(false);
     const cameraTransition = useRef(null);
-
+    const clock = new THREE.Clock();
 
     useEffect(() => {
         const scene = new THREE.Scene();
@@ -71,105 +71,126 @@ const Practice_3 = () => {
         }
 
         const solarSystem = new THREE.Object3D();
+        solarSystem.name = 'solarSystem';
         scene.add(solarSystem);
         objects.push(solarSystem);
 
         const sunMesh = createSphereCB(planetaryData.sun);
+        sunMesh.name = 'sun';
         solarSystem.add(sunMesh);
         planetRefs.current.sun = sunMesh;
         objects.push(sunMesh);
 
         const mercuryOrbit = new THREE.Object3D();
+        mercuryOrbit.name = 'mercuryOrbit';
         solarSystem.add(mercuryOrbit);
         objects.push(mercuryOrbit);
 
         const mercuryMesh = createSphereCB(planetaryData.mercury);
+        mercuryMesh.name = 'mercury';
         mercuryOrbit.add(mercuryMesh);
         planetRefs.current.mercury = mercuryMesh;
         objects.push(mercuryMesh);
 
         const venusOrbit = new THREE.Object3D();
+        venusOrbit.name = 'venusOrbit';
         solarSystem.add(venusOrbit);
         objects.push(venusOrbit);
 
         const venusMesh = createSphereCB(planetaryData.venus);
+        venusMesh.name = 'venus';
         venusOrbit.add(venusMesh);
         planetRefs.current.venus = venusMesh;
         objects.push(venusMesh);
 
         const earthOrbit = new THREE.Object3D();
+        earthOrbit.name = 'earthOrbit';
         solarSystem.add(earthOrbit);
         objects.push(earthOrbit);
 
         const earthMesh = createSphereCB(planetaryData.earth);
+        earthMesh.name = 'earth';
         earthOrbit.add(earthMesh);
         planetRefs.current.earth = earthMesh;
         objects.push(earthMesh);
 
         // const moonOrbit = new THREE.Object3D();
+        // moonOrbit.name = 'moonOrbit';
         // moonOrbit.position.set(2, 0, 0);
         // earthOrbit.add(moonOrbit);
 
         // const moonMaterial = new THREE.MeshPhongMaterial({ color: 0x888888, emissive: 0x222222 });
         // const moonMesh = new THREE.Mesh(sphereGeometry, moonMaterial);
         // moonMesh.scale.set(.5, .5, .5);
+        // moonMesh.name = 'moon';
         // moonOrbit.add(moonMesh);
         // objects.push(moonMesh);
 
         const marsOrbit = new THREE.Object3D();
+        marsOrbit.name = 'marsOrbit';
         solarSystem.add(marsOrbit);
         objects.push(marsOrbit);
 
         const marsMesh = createSphereCB(planetaryData.mars);
+        marsMesh.name = 'mars';
         marsOrbit.add(marsMesh);
         planetRefs.current.mars = marsMesh;
         objects.push(marsMesh);
 
         const jupiterOrbit = new THREE.Object3D();
+        jupiterOrbit.name = 'jupiterOrbit';
         solarSystem.add(jupiterOrbit);
         objects.push(jupiterOrbit);
 
         const jupiterMesh = createSphereCB(planetaryData.jupiter);
+        jupiterMesh.name = 'jupiter';
         jupiterOrbit.add(jupiterMesh);
         planetRefs.current.jupiter = jupiterMesh;
         objects.push(jupiterMesh);
 
         const saturnOrbit = new THREE.Object3D();
+        saturnOrbit.name = 'saturnOrbit';
         solarSystem.add(saturnOrbit);
         objects.push(saturnOrbit);
 
         const saturnMesh = createSphereCB(planetaryData.saturn);
+        saturnMesh.name = 'saturn';
         saturnOrbit.add(saturnMesh);
         planetRefs.current.saturn = saturnMesh;
         objects.push(saturnMesh);
 
         const uranusOrbit = new THREE.Object3D();
+        uranusOrbit.name = 'uranusOrbit';
         solarSystem.add(uranusOrbit);
         objects.push(uranusOrbit);
 
         const uranusMesh = createSphereCB(planetaryData.uranus);
+        uranusMesh.name = 'uranus';
         uranusOrbit.add(uranusMesh);
         planetRefs.current.uranus = uranusMesh;
         objects.push(uranusMesh);
 
         const neptuneOrbit = new THREE.Object3D();
+        neptuneOrbit.name = 'neptuneOrbit';
         solarSystem.add(neptuneOrbit);
         objects.push(neptuneOrbit);
 
         const neptuneMesh = createSphereCB(planetaryData.neptune);
+        neptuneMesh.name = 'neptune';
         neptuneOrbit.add(neptuneMesh);
         planetRefs.current.neptune = neptuneMesh;
         objects.push(neptuneMesh);
 
         const plutoOrbit = new THREE.Object3D();
+        plutoOrbit.name = 'plutoOrbit';
         solarSystem.add(plutoOrbit);
         objects.push(plutoOrbit);
 
         const plutoMesh = createSphereCB(planetaryData.pluto);
+        plutoMesh.name = 'pluto';
         plutoOrbit.add(plutoMesh);
         planetRefs.current.pluto = plutoMesh;
         objects.push(plutoMesh);
-
 
         Object.entries(planetaryData).forEach(([name, planet]) => {
             if (name !== 'sun') {
@@ -192,10 +213,19 @@ const Practice_3 = () => {
                     cameraTransition.current = null;
                 }
             }
-
-            // objects.forEach(object => {
-            //     object.rotation.y += 0.01;
-            // });
+            const elapsedTime = clock.getElapsedTime();
+            objects.forEach(object => {
+                // object.rotation.y += 0.01;
+                const data = planetaryData[object.name];
+                if (data && data.orbitalPeriod > 0) {
+                    const angle = data.initialAngle + elapsedTime * (1 / data.orbitalPeriod) * Math.PI * 2;
+                    object.position.set(
+                        Math.cos(angle) * data.distance,
+                        0,
+                        Math.sin(angle) * data.distance
+                    );
+                }
+            });
             renderer.render(scene, camera);
         }
         renderer.setAnimationLoop(animation);
@@ -223,7 +253,7 @@ const Practice_3 = () => {
         const targetPos = pos.clone().add(offset);
 
         const cam = cameraRef.current;
-        cam.rotation.y = Math.PI / 4;
+        // cam.rotation.y = Math.PI / 4;
         const ctrl = orbitControlsRef.current;
 
         cameraTransition.current = {
