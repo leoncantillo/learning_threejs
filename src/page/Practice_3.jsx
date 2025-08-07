@@ -1,10 +1,15 @@
 import { useEffect, useRef, useState } from 'react';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import * as THREE from 'three';
-import planetaryData from '../utils/planetaryDataBig.js';
+import planetaryDataReal from '../utils/planetaryData.js';
+import planetaryDataX100 from '../utils/planetaryDatax100.js';
+import planetaryDataBig from '../utils/planetaryDataBig.js';
 import FocusPlanetBtn from '../components/FocusPlanetBtn.jsx';
+import SwitchDataSizeBtn from '../components/SwitchDataSizeBtn.jsx';
 
 const Practice_3 = () => {
+    const [dataScale, setDataScale] = useState('big');
+    const planetaryData = useRef(null);
     const canvasRef = useRef(null);
     const planetRefs = useRef({});
     const cameraRef = useRef(null);
@@ -14,24 +19,36 @@ const Practice_3 = () => {
     const clock = new THREE.Clock();
 
     useEffect(() => {
+        planetaryData.current = dataScale == 'big' && planetaryDataBig ||
+            dataScale == 'x100' && planetaryDataX100 || planetaryDataReal;
+
         const scene = new THREE.Scene();
+        const near = dataScale == 'big' && 0.1 ||
+            dataScale == 'x100' && 0.001 || 0.0001;
+        const far = dataScale == 'big' && 1000 ||
+            dataScale == 'x100' && 2000 || 12000;
         const camera = new THREE.PerspectiveCamera(
             75, window.innerWidth / window.innerHeight,
-            0.1, 10000
+            near, far
         );
-        camera.position.set(0, 5, 85);
+        camera.position.set(0, 5, 5);
         camera.up.set(0, 1, 0);
         camera.lookAt(0, 0, 0);
         cameraRef.current = camera;
 
-        const renderer = new THREE.WebGLRenderer({ canvas: canvasRef.current, antialias: true, depth: true});
+        const renderer = new THREE.WebGLRenderer({ canvas: canvasRef.current, antialias: true, depth: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.render(scene, camera);
 
         const orbitControls = new OrbitControls(camera, renderer.domElement);
-        orbitControls.zoomSpeed = 5;
+        orbitControls.zoomSpeed = dataScale == 'big' && 5 ||
+            dataScale == 'x100' && 10 || 15;
+        orbitControls.maxDistance = dataScale == 'big' && 600 ||
+            dataScale == 'x100' && 1000 || 10000;
         orbitControls.update();
         orbitControlsRef.current = orbitControls;
+
+        animateCameraWhenScaling(dataScale);
 
         // FOV control variables
         const tanFOV = Math.tan((Math.PI / 180) * camera.fov / 2);
@@ -53,8 +70,12 @@ const Practice_3 = () => {
         window.addEventListener('resize', onWindowResize);
 
         // Lights
-        const sunshine = new THREE.PointLight(0xfffffff, 5000);
-        scene.add(sunshine);
+        {
+            const intensity = dataScale == 'big' && 10000 ||
+                dataScale == 'x100' && 10000 || 500000;
+            const sunshine = new THREE.PointLight(0xfffffff, intensity);
+            scene.add(sunshine);
+        }
 
         const objects = [];
 
@@ -74,7 +95,7 @@ const Practice_3 = () => {
         scene.add(solarSystem);
         objects.push(solarSystem);
 
-        const sunMesh = createSphereCB(planetaryData.sun);
+        const sunMesh = createSphereCB(planetaryData.current.sun);
         sunMesh.name = 'sun';
         solarSystem.add(sunMesh);
         planetRefs.current.sun = sunMesh;
@@ -85,7 +106,7 @@ const Practice_3 = () => {
         solarSystem.add(mercuryOrbit);
         objects.push(mercuryOrbit);
 
-        const mercuryMesh = createSphereCB(planetaryData.mercury);
+        const mercuryMesh = createSphereCB(planetaryData.current.mercury);
         mercuryMesh.name = 'mercury';
         mercuryOrbit.add(mercuryMesh);
         planetRefs.current.mercury = mercuryMesh;
@@ -96,7 +117,7 @@ const Practice_3 = () => {
         solarSystem.add(venusOrbit);
         objects.push(venusOrbit);
 
-        const venusMesh = createSphereCB(planetaryData.venus);
+        const venusMesh = createSphereCB(planetaryData.current.venus);
         venusMesh.name = 'venus';
         venusOrbit.add(venusMesh);
         planetRefs.current.venus = venusMesh;
@@ -107,7 +128,7 @@ const Practice_3 = () => {
         solarSystem.add(earthOrbit);
         objects.push(earthOrbit);
 
-        const earthMesh = createSphereCB(planetaryData.earth);
+        const earthMesh = createSphereCB(planetaryData.current.earth);
         earthMesh.name = 'earth';
         earthOrbit.add(earthMesh);
         planetRefs.current.earth = earthMesh;
@@ -130,7 +151,7 @@ const Practice_3 = () => {
         solarSystem.add(marsOrbit);
         objects.push(marsOrbit);
 
-        const marsMesh = createSphereCB(planetaryData.mars);
+        const marsMesh = createSphereCB(planetaryData.current.mars);
         marsMesh.name = 'mars';
         marsOrbit.add(marsMesh);
         planetRefs.current.mars = marsMesh;
@@ -141,7 +162,7 @@ const Practice_3 = () => {
         solarSystem.add(jupiterOrbit);
         objects.push(jupiterOrbit);
 
-        const jupiterMesh = createSphereCB(planetaryData.jupiter);
+        const jupiterMesh = createSphereCB(planetaryData.current.jupiter);
         jupiterMesh.name = 'jupiter';
         jupiterOrbit.add(jupiterMesh);
         planetRefs.current.jupiter = jupiterMesh;
@@ -152,7 +173,7 @@ const Practice_3 = () => {
         solarSystem.add(saturnOrbit);
         objects.push(saturnOrbit);
 
-        const saturnMesh = createSphereCB(planetaryData.saturn);
+        const saturnMesh = createSphereCB(planetaryData.current.saturn);
         saturnMesh.name = 'saturn';
         saturnOrbit.add(saturnMesh);
         planetRefs.current.saturn = saturnMesh;
@@ -163,7 +184,7 @@ const Practice_3 = () => {
         solarSystem.add(uranusOrbit);
         objects.push(uranusOrbit);
 
-        const uranusMesh = createSphereCB(planetaryData.uranus);
+        const uranusMesh = createSphereCB(planetaryData.current.uranus);
         uranusMesh.name = 'uranus';
         uranusOrbit.add(uranusMesh);
         planetRefs.current.uranus = uranusMesh;
@@ -174,7 +195,7 @@ const Practice_3 = () => {
         solarSystem.add(neptuneOrbit);
         objects.push(neptuneOrbit);
 
-        const neptuneMesh = createSphereCB(planetaryData.neptune);
+        const neptuneMesh = createSphereCB(planetaryData.current.neptune);
         neptuneMesh.name = 'neptune';
         neptuneOrbit.add(neptuneMesh);
         planetRefs.current.neptune = neptuneMesh;
@@ -185,13 +206,13 @@ const Practice_3 = () => {
         solarSystem.add(plutoOrbit);
         objects.push(plutoOrbit);
 
-        const plutoMesh = createSphereCB(planetaryData.pluto);
+        const plutoMesh = createSphereCB(planetaryData.current.pluto);
         plutoMesh.name = 'pluto';
         plutoOrbit.add(plutoMesh);
         planetRefs.current.pluto = plutoMesh;
         objects.push(plutoMesh);
 
-        Object.entries(planetaryData).forEach(([name, planet]) => {
+        Object.entries(planetaryData.current).forEach(([name, planet]) => {
             if (name !== 'sun') {
                 const orbit = createOrbit(planet.distance);
                 scene.add(orbit);
@@ -199,6 +220,7 @@ const Practice_3 = () => {
         });
 
         function animation(time) {
+            // Focus on Celestial Body
             if (cameraTransition.current) {
                 const { startTime, duration, start, targetPos, targetLook } = cameraTransition.current;
                 const elapsed = (time - startTime) / duration;
@@ -212,10 +234,12 @@ const Practice_3 = () => {
                     cameraTransition.current = null;
                 }
             }
+
+            // Planet's Revolution Animation 
             const elapsedTime = clock.getElapsedTime();
             objects.forEach(object => {
                 // object.rotation.y += 0.01;
-                const data = planetaryData[object.name];
+                const data = planetaryData.current[object.name];
                 if (data && data.orbitalPeriod > 0) {
                     const angle = data.initialAngle + elapsedTime * (1 / data.orbitalPeriod) * Math.PI * 2;
                     object.position.set(
@@ -237,22 +261,33 @@ const Practice_3 = () => {
             renderer.setAnimationLoop(null);
             renderer.dispose();
         };
-    }, []);
+    }, [dataScale]);
 
-    // Función para enfocar la cámara en un planeta
     const focusOnPlanet = (planetName) => {
         const mesh = planetRefs.current[planetName];
         if (!mesh) { console.error('No mesh:', planetName); return; }
 
-        const pos = new THREE.Vector3();
-        mesh.getWorldPosition(pos);
+        const sunMesh = planetRefs.current['sun'];
+        if (!sunMesh) { console.error('No mesh: sun'); return; }
 
-        const radius = planetaryData[planetName]?.radius || 1;
-        const offset = new THREE.Vector3(0, 0, radius * 4);
-        const targetPos = pos.clone().add(offset);
+        const planetPos = new THREE.Vector3();
+        mesh.getWorldPosition(planetPos);
+
+        const sunPos = new THREE.Vector3();
+        sunMesh.getWorldPosition(sunPos);
+
+        const directionToSun = new THREE.Vector3().subVectors(sunPos, planetPos).normalize();
+
+        const radius = planetaryData.current[planetName]?.radius || 1;
+        const distanceBehind = radius * 5;
+        const verticalOffset = radius * 2;
+
+        const targetPos = planetPos.clone()
+            .sub(directionToSun.clone().multiplyScalar(distanceBehind)) // behind
+            .add(new THREE.Vector3(0, verticalOffset, 0)); // top left
 
         const cam = cameraRef.current;
-        // cam.rotation.y = Math.PI / 4;
+        // cam.rotation.y = Math.PI;
         const ctrl = orbitControlsRef.current;
 
         cameraTransition.current = {
@@ -263,7 +298,7 @@ const Practice_3 = () => {
                 target: ctrl.target.clone()
             },
             targetPos,
-            targetLook: pos
+            targetLook: planetPos
         };
     };
 
@@ -286,10 +321,44 @@ const Practice_3 = () => {
         return orbit;
     }
 
+    function animateCameraWhenScaling() {
+        const cam = cameraRef.current;
+        const ctrl = orbitControlsRef.current;
+
+        const transition = {
+            startTime: performance.now(),
+            duration: 1000,
+            start: {
+                pos: cam.position.clone(),
+                target: ctrl.target.clone()
+            },
+            targetLook: new THREE.Vector3(0, 0, 0),
+            targetPos: new THREE.Vector3(0, 40, 150)
+        };
+
+        switch (dataScale) {
+            case 'real':
+                transition.targetPos = new THREE.Vector3(0, 60, 100);
+                break;
+            case 'x100':
+                transition.targetPos = new THREE.Vector3(0, 50, 200);
+                break;
+            case 'big':
+                break;
+            default:
+                console.error('Option not available.');
+                return;
+        }
+
+        cameraTransition.current = transition;
+    }
+
+
     return (
         <>
             <canvas ref={canvasRef} />
             {isReady && <FocusPlanetBtn focusOnPlanet={focusOnPlanet} />}
+            {isReady && <SwitchDataSizeBtn setDataScale={setDataScale} />}
         </>
     );
 };
