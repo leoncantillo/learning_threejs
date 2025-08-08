@@ -9,7 +9,7 @@ const planetaryData = {
   },
   mercury: {
     radius: 0.0244,
-    distance: 5.79,
+    distance: 7.79,
     eccentricity: 0.206,
     color: "#b1b1b1",
     emissiveColor: "#2a2a2a",
