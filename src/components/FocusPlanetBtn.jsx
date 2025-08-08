@@ -1,6 +1,6 @@
 import '../styles/FocusPlanetBtn.scss';
 
-const FocusPlanetBtn = ({ focusOnPlanet, focusedPlanet }) => {
+const FocusPlanetBtn = ({ focusOnPlanet, focusedPlanet, stopFocus }) => {
     const planets = ['sun', 'mercury', 'venus', 'earth', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune', 'pluto'];
 
     return (
@@ -10,10 +10,14 @@ const FocusPlanetBtn = ({ focusOnPlanet, focusedPlanet }) => {
                 {planets.map(planet => (
                     <li
                         key={planet}
-                        onClick={() => focusOnPlanet(planet)}
+                        onClick={() => {
+                            focusedPlanet === planet ? stopFocus() : focusOnPlanet(planet);}
+                        }
                         className={focusedPlanet === planet ? 'focused' : ''}
                     >
-                            Look at {planet[0].toUpperCase()}${planet.slice(1)}
+                        {focusedPlanet === planet
+                            ? `Stop Focusing`
+                            : `Look at ${planet[0].toUpperCase()}${planet.slice(1)}`}
                     </li>
                 ))}
             </ul>

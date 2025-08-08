@@ -16,7 +16,11 @@ const Practice_3 = () => {
     const orbitControlsRef = useRef(null);
     const [isReady, setIsReady] = useState(false);
     const cameraTransition = useRef(null);
-    const clock = new THREE.Clock();
+    const [focusedPlanet, setFocusedPlanet] = useState(null);
+    const pauseRevolutionRef = useRef(false);
+    const pauseStartTime = useRef(null);
+    const pauseOffset = useRef(0);
+    const clock = useRef(new THREE.Clock());
 
     useEffect(() => {
         planetaryData.current = dataScale == 'big' && planetaryDataBig ||
@@ -232,23 +236,25 @@ const Practice_3 = () => {
 
                 if (t >= 1) {
                     cameraTransition.current = null;
+                    orbitControlsRef.current.enabled = true;
                 }
             }
 
             // Planet's Revolution Animation 
-            const elapsedTime = clock.getElapsedTime();
-            objects.forEach(object => {
-                // object.rotation.y += 0.01;
-                const data = planetaryData.current[object.name];
-                if (data && data.orbitalPeriod > 0) {
-                    const angle = data.initialAngle + elapsedTime * (1 / data.orbitalPeriod) * Math.PI * 2;
-                    object.position.set(
-                        Math.cos(angle) * data.distance,
-                        0,
-                        Math.sin(angle) * data.distance
-                    );
-                }
-            });
+            const elapsedTime = clock.current.getElapsedTime() - pauseOffset.current;
+            if (!pauseRevolutionRef.current) {
+                objects.forEach(object => {
+                    const data = planetaryData.current[object.name];
+                    if (data && data.orbitalPeriod > 0) {
+                        const angle = data.initialAngle + elapsedTime * (1 / data.orbitalPeriod) * Math.PI * 2;
+                        object.position.set(
+                            Math.cos(angle) * data.distance,
+                            0,
+                            Math.sin(angle) * data.distance
+                        );
+                    }
+                });
+            }
             renderer.render(scene, camera);
         }
         renderer.setAnimationLoop(animation);
@@ -264,43 +270,63 @@ const Practice_3 = () => {
     }, [dataScale]);
 
     const focusOnPlanet = (planetName) => {
-        const mesh = planetRefs.current[planetName];
-        if (!mesh) { console.error('No mesh:', planetName); return; }
-
-        const sunMesh = planetRefs.current['sun'];
-        if (!sunMesh) { console.error('No mesh: sun'); return; }
-
-        const planetPos = new THREE.Vector3();
-        mesh.getWorldPosition(planetPos);
-
-        const sunPos = new THREE.Vector3();
-        sunMesh.getWorldPosition(sunPos);
-
-        const directionToSun = new THREE.Vector3().subVectors(sunPos, planetPos).normalize();
-
-        const radius = planetaryData.current[planetName]?.radius || 1;
-        const distanceBehind = radius * 5;
-        const verticalOffset = radius * 2;
-
-        const targetPos = planetPos.clone()
-            .sub(directionToSun.clone().multiplyScalar(distanceBehind)) // behind
-            .add(new THREE.Vector3(0, verticalOffset, 0)); // top left
-
-        const cam = cameraRef.current;
-        // cam.rotation.y = Math.PI;
-        const ctrl = orbitControlsRef.current;
-
-        cameraTransition.current = {
-            startTime: performance.now(),
-            duration: 1000,
-            start: {
-                pos: cam.position.clone(),
-                target: ctrl.target.clone()
-            },
-            targetPos,
-            targetLook: planetPos
-        };
+        setFocusedPlanet(planetName);
     };
+
+    const stopFocus = () => setFocusedPlanet(null);
+
+
+    useEffect(() => {
+        const controls = orbitControlsRef.current;
+        if (!controls) return;
+
+        if (focusedPlanet) {
+            const mesh = planetRefs.current[focusedPlanet];
+            if (!mesh) { console.warn('No mesh:', focusedPlanet); return; }
+
+            const sunMesh = planetRefs.current['sun'];
+            if (!sunMesh) { console.warn('No mesh: sun'); return; }
+
+            const planetPos = new THREE.Vector3();
+            mesh.getWorldPosition(planetPos);
+
+            const sunPos = new THREE.Vector3();
+            sunMesh.getWorldPosition(sunPos);
+
+            const directionToSun = new THREE.Vector3().subVectors(sunPos, planetPos).normalize();
+
+            const radius = planetaryData.current[focusedPlanet]?.radius || 1;
+            const distanceBehind = radius * 5;
+            const verticalOffset = radius * 2;
+
+            const targetPos = planetPos.clone()
+                .sub(directionToSun.clone().multiplyScalar(distanceBehind)) // behind
+                .add(new THREE.Vector3(0, verticalOffset, 0)); // top left
+
+            const cam = cameraRef.current;
+            const ctrl = orbitControlsRef.current;
+
+            cameraTransition.current = {
+                startTime: performance.now(),
+                duration: 1000,
+                start: {
+                    pos: cam.position.clone(),
+                    target: ctrl.target.clone()
+                },
+                targetPos,
+                targetLook: planetPos
+            };
+
+            orbitControlsRef.current.enabled = false;
+            orbitControlsRef.current.enablePan = false;
+            pauseRevolutionRef.current = true;
+            pauseStartTime.current = clock.current.getElapsedTime();
+        } else {
+            pauseOffset.current = clock.current.getElapsedTime() - pauseStartTime.current;
+            pauseRevolutionRef.current = false;
+            orbitControlsRef.current.enablePan = true;
+        }
+    }, [focusedPlanet]);
 
     function createOrbit(radius, segments = 100, color = 0xffffff) {
         const curve = new THREE.EllipseCurve(
@@ -357,7 +383,11 @@ const Practice_3 = () => {
     return (
         <>
             <canvas ref={canvasRef} />
-            {isReady && <FocusPlanetBtn focusOnPlanet={focusOnPlanet} />}
+            {isReady && <FocusPlanetBtn
+                focusOnPlanet={focusOnPlanet}
+                focusedPlanet={focusedPlanet}
+                stopFocus={stopFocus}
+            />}
             {isReady && <SwitchDataSizeBtn setDataScale={setDataScale} />}
         </>
     );
