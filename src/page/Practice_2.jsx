@@ -96,7 +96,7 @@ function Practice_2() {
     }
 
     // 3D ESCALATOR MODEL
-    gltfLoader.load('/models/escalator.glb',(glb) => {
+    gltfLoader.load(`${import.meta.env.BASE_URL}models/escalator.glb`,(glb) => {
         const root = glb.scene;
         root.scale.set(3, 3, 3);
         root.position.set(0, -0.32, -2);
@@ -114,7 +114,7 @@ function Practice_2() {
     });
 
     // CHARACTER JAMES
-    fbxLoader.load('/models/character(James).fbx',
+    fbxLoader.load(`${import.meta.env.BASE_URL}models/character(James).fbx`,
       (fbx) => {
         const root = fbx;
         root.scale.set(0.006,0.006,0.006);
@@ -122,7 +122,7 @@ function Practice_2() {
 
         const mixer = new THREE.AnimationMixer(root);
 
-        fbxLoader.load('/models/animations/SwaggerWalk.fbx',
+        fbxLoader.load(`${import.meta.env.BASE_URL}models/animations/SwaggerWalk.fbx`,
           (anim) => {
             const animation = anim.animations[0];
             const action = mixer.clipAction(animation);
@@ -135,7 +135,7 @@ function Practice_2() {
     );
 
     // CHARACTER JOE
-    fbxLoader.load('/models/character(Joe).fbx', (fbx) => {
+    fbxLoader.load(`${import.meta.env.BASE_URL}models/character(Joe).fbx`, (fbx) => {
         const root = fbx;
         root.scale.set(0.006,0.006,0.006);
         root.position.set(-0.8, 0, 1.8);
@@ -151,7 +151,7 @@ function Practice_2() {
         };
 
         // Load both animations and mark when ready
-        fbxLoader.load('/models/animations/ListeningToMusic.fbx', (anim) => {
+        fbxLoader.load(`${import.meta.env.BASE_URL}models/animations/ListeningToMusic.fbx`, (anim) => {
           const animation = anim.animations[0];
           actions.listening = mixer.clipAction(animation);
           actions.listening.setLoop(THREE.LoopOnce);
@@ -160,7 +160,7 @@ function Practice_2() {
           tryStartSequence();
         });
 
-        fbxLoader.load('/models/animations/LookingBehind.fbx', (anim) => {
+        fbxLoader.load(`${import.meta.env.BASE_URL}models/animations/LookingBehind.fbx`, (anim) => {
           const animation = anim.animations[0];
           actions.looking = mixer.clipAction(animation);
           actions.looking.setLoop(THREE.LoopOnce);

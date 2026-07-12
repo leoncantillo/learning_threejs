@@ -70,7 +70,7 @@ const Practice_1 = () => {
 
     // Text
     const loader = new FontLoader();
-    loader.load('/fonts/helvetiker_bold.typeface.json', function (font) {
+    loader.load(`${import.meta.env.BASE_URL}fonts/helvetiker_bold.typeface.json`, function (font) {
       const textGeometry = new TextGeometry('Hello Cube', {
         font: font,
         size: 1,
